@@ -76,6 +76,21 @@ def test_milvus_with_id() -> None:
         assert isinstance(e, AssertionError)
 
 
+def test_similarity_search_by_vector():
+    """Test end to end construction and search by vector."""
+
+    texts = ["foo", "bar", "baz"]
+    metadatas = [{"page": i} for i in range(len(texts))]
+    docsearch = _milvus_from_texts(metadatas=metadatas)
+    dummy_vector = FakeEmbeddings().embed_query("foo")
+    docs = docsearch.similarity_search_by_vector(dummy_vector, k=1)
+    assert len(docs) == 1
+
+    assert_docs_equal_without_pk(
+        docs, [Document(page_content="foo", metadata={"page": 0})]
+    )
+
+
 def test_milvus_with_score() -> None:
     """Test end to end construction and search with scores and IDs."""
     texts = ["foo", "bar", "baz"]
